@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <meta name="description" content="The Monkey Bar">
+    <title>Speech Translator Web App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+      <div class="sidebar">
+        <input class="sidebar-item" type="file" id="file-picker" accept=".wav" name="file-picker">       
+        <div class="sidebar-item">
+          <div class="label-text">Source language</div>
+          <!-- For the full list of supported languages see:
+          https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
+          <select id="language-options">
+            <option value="ar-EG">Arabic - EG</option>
+            <option value="ca-ES">Catalan - ES</option>
+            <option value="zh-CN">Chinese - CN</option>
+            <option value="zh-HK">Chinese - HK</option>
+            <option value="zh-TW">Chinese - TW</option>
+            <option value="da-DK">Danish - DK</option>
+            <option value="da-DK">Danish - DK</option>
+            <option value="nl-NL">Dutch - NL</option>
+            <option value="en-AU">English - AU</option>
+            <option value="en-CA">English - CA</option>
+            <option value="en-GB">English - GB</option>
+            <option value="en-IN">English - IN</option>
+            <option value="en-NZ">English - NZ</option>
+            <option value="en-US" selected="selected">English - US</option>
+            <option value="de-DE">German - DE</option>
+            <option value="es-ES">Spanish - ES</option>
+            <option value="es-MX">Spanish - MX</option>
+            <option value="fi-FI">Finnish - FI</option>
+            <option value="fr-CA">French - CA</option>
+            <option value="fr-FR">French - FR</option>
+            <option value="hi-IN">Hindi - IN</option>
+            <option value="it-IT">Italian - IT</option>
+            <option value="ja-JP">Japanese - JP</option>
+            <option value="ko-KR">Korean - KR</option>
+            <option value="nb-NO">Norwegian - NO</option>
+            <option value="pl-PL">Polish - PL</option>
+            <option value="pt-BR">Portuguese - BR</option>
+            <option value="pt-PT">Portuguese - PT</option>
+            <option value="ru-RU">Russian - RU</option>
+            <option value="sv-SE">Swedish - SE</option>
+        </select>           
+        </div>
+
+        <button type="button" class="sidebar-item" id="save-changes-button">Save Changes</button>
+        <button type="button" class="sidebar-item" id="save-transcript-button">Save Transcript</button>
+        <button type="button" class="sidebar-item" id="start-translation-button">Start Translation</button>
+        <button type="button" class="sidebar-item" id="stop-translation-button">Stop Translation</button>
+
+        <div class="sidebar-item">
+          <div class="label-text">Subscription key</div>
+          <input type="text" id="subscription-key-text" name="subscription-key-text">
+        </div>
+
+        <div class="sidebar-item">
+          <div class="label-text">Region</div>
+          <select id="region-options">
+            <option value="westus">West US</option>
+            <option value="westus2">West US 2</option>
+            <option value="eastus">East US</option>
+            <option value="eastus2">East US 2</option>
+            <option value="eastasia">East Asia</option>
+            <option value="southeastasia">South East Asia</option>
+            <option value="northeurope">North Europe</option>
+            <option value="westeurope" selected="selected">West Europe</option>
+            <option value="usgovarizona">US Gov Arizona</option>
+            <option value="usgovvirginia">US Gov Virginia</option>
+          </select>
+        </div>
+                
+      </div>      
+      <div class="main">
+        <div class="text-boxes">
+          <div id='real-time-transcript-text'></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Speech SDK REFERENCE -->
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+    <!-- Library for generating Lorem Ipsum text
+    https://github.com/fffilo/lorem-ipsum-js -->
+    <script src="lorem-ipsum.js"></script>
+
+    <!-- Speech SDK presence check -->
+    <script>
+      // On document load resolve the Speech SDK dependency
+      function Initialize(onComplete) {
+          if (!!window.SpeechSDK) {
+              onComplete(window.SpeechSDK);
+          }
+      }
+    </script>
+
+    <script>
+      var loremIpsumRun = false;
+      var speechTranslationConfig = undefined;
+      var recognizer = undefined;
+      var audioFile = undefined;
+      var filePicker = document.getElementById("file-picker");
+
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      if (urlParams) {
+        const lorem = urlParams.get('lorem')
+        if (lorem == "true") {
+          loremIpsumRun = true;
+          console.log("Simulation lorem ipsum run enabled");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var SpeechSDK;
+
+        Initialize(function (speechSdk) {
+            SpeechSDK = speechSdk;           
+        });
+      });  
+    </script>
+
+    <script>
+      var textBoxCount = 0;
+
+      /* 
+          Dynamically appends an "editable-text-box" in the "text-boxes" div in the following format.
+
+          <div class="editable-text-box">
+              <div class="editable-text-wrapper">
+                  <div class="editable-text" contentEditable="true" tabindex="0">
+                      text here
+                  </div>
+              </div>
+              <div class="play-snippet-wrapper">
+                  <img class="play-snippet-button" src="images/play-snippet.jpg" alt="play snippet">
+              </div>
+          </div>
+      */
+      function appendEditableTextBox(text, textAreaID, textWrapperID, playButtonID) {
+          var textBox=document.createElement("div");
+          textBox.className = "editable-text-box";
+
+          var textWrapper=document.createElement("div");
+          textWrapper.className = "editable-text-wrapper"; 
+          textWrapper.id = textWrapperID;
+          textBox.appendChild(textWrapper);
+
+          var editableText=document.createElement("div");
+          editableText.className = "editable-text"; 
+          editableText.id = textAreaID;
+          editableText.innerText = text;
+          editableText.contentEditable = "true";
+          editableText.tabIndex = "0";
+          textWrapper.appendChild(editableText);
+
+          var playSnippetWrapper=document.createElement("div");
+          playSnippetWrapper.className = "play-snippet-wrapper"; 
+          textBox.appendChild(playSnippetWrapper);    
+
+          var playSnippetImg=document.createElement("img");
+          playSnippetImg.className = "play-snippet-button";
+          playSnippetImg.alt = "play snippet";
+          playSnippetImg.src = "images/play-snippet.jpg";
+          playSnippetImg.id = playButtonID;
+          playSnippetWrapper.appendChild(playSnippetImg);
+
+          document.getElementsByClassName('text-boxes')[0].appendChild(textBox);
+      }
+
+      function addLoremIpsum() {
+        if (textBoxCount > 10)
+          clearInterval(lorumIpsumTimer);
+
+        let textAreaID = "text-area-" + textBoxCount.toString() + "-id";
+        let textWrapperID = "text-wrapper-" + textBoxCount.toString() + "-id";
+        let playButtonID = "play-button-" + textBoxCount.toString() + "-id";
+        let ipsum = new LoremIpsum();
+        let sentence = ipsum.sentence(8, 12);
+
+        appendEditableTextBox(sentence, textAreaID, textWrapperID, playButtonID);
+
+        document.getElementById("real-time-transcript-text").innerText += sentence + "\n";
+        textBoxCount++;
+      }
+    </script>
+
+    <script>
+        var lorumIpsumTimer;
+
+        function addTranslation(text)
+        {
+          let textAreaID = "text-area-" + textBoxCount.toString() + "-id";
+          let textWrapperID = "text-wrapper-" + textBoxCount.toString() + "-id";
+          let playButtonID = "play-button-" + textBoxCount.toString() + "-id";
+
+          appendEditableTextBox(text, textAreaID, textWrapperID, playButtonID);
+
+          document.getElementById("real-time-transcript-text").innerText += text + "\n";
+          textBoxCount++;          
+        }
+
+        filePicker.addEventListener("change", function () {
+            audioFile = filePicker.files[0];          
+        });
+
+        document.getElementById("stop-translation-button").addEventListener("click", function () {
+          if (recognizer)
+            recognizer.stopContinuousRecognitionAsync();
+        });
+
+        document.getElementById("start-translation-button").addEventListener("click", function () {
+          if (loremIpsumRun) {
+            lorumIpsumTimer = setInterval(addLoremIpsum, 3000);
+            return;
+          }
+
+          if (!audioFile) {
+            alert("Please select an audio file");
+            return;
+          }
+
+          let subscriptionKeyText = document.getElementById("subscription-key-text");
+
+          if (subscriptionKeyText.value.length == 0) {
+            alert("Please enter a subscription key");
+            return;            
+          }
+
+          let regionOptions = document.getElementById("region-options");
+          speechTranslationConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(
+            subscriptionKeyText.value, regionOptions.value);
+
+          speechTranslationConfig.outputFormat = SpeechSDK.OutputFormat.Detailed;  
+
+          const audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile); 
+          
+          speechTranslationConfig.addTargetLanguage("en-US");
+          speechTranslationConfig.speechRecognitionLanguage = document.getElementById("language-options").value;
+                     
+          recognizer = new SpeechSDK.TranslationRecognizer(speechTranslationConfig, audioConfig);
+
+          recognizer.recognizing = (s, e) => {
+              console.log(`TRANSLATING: Text=${e.result.text}`);
+          };
+          recognizer.recognized = (s, e) => {
+              if (e.result.reason == SpeechSDK.ResultReason.TranslatedSpeech) {
+                console.log(`TRANSLATED: Text=${e.result.text}`);
+
+                if (e.result.translations) {
+                  let translation = e.result.translations.get("en");
+                  addTranslation(translation);
+                }
+              }
+              else if (e.result.reason == SpeechSDK.ResultReason.NoMatch) {
+                  console.log("NOMATCH: Speech could not be translated.");
+              }
+          };
+          recognizer.canceled = (s, e) => {
+              console.log(`CANCELED: Reason=${e.reason}`);
+              if (e.reason == CancellationReason.Error) {
+                  console.log(`"CANCELED: ErrorCode=${e.errorCode}`);
+                  console.log(`"CANCELED: ErrorDetails=${e.errorDetails}`);
+                  console.log("CANCELED: Did you update the subscription info?");
+              }
+              recognizer.stopContinuousRecognitionAsync();
+          };
+          recognizer.sessionStopped = (s, e) => {
+              console.log("\n    Session stopped event.");
+              recognizer.stopContinuousRecognitionAsync();
+          };
+
+          recognizer.startContinuousRecognitionAsync();  
+        });
+    </script>
+
+
+</body>
+</html>
