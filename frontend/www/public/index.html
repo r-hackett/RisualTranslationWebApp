@@ -74,12 +74,15 @@
             <option value="usgovvirginia">US Gov Virginia</option>
           </select>
         </div>
+
+        <audio class="sidebar-item" id="audio-player" controls preload></audio>
                 
       </div>      
       <div class="main">
         <div class="text-boxes">
-          <div id='real-time-transcript-text'></div>
+          <textarea id="real-time-transcript-textarea" name="real-time-transcript-textarea" rows="4" cols="50"></textarea>
         </div>
+        <button onclick="topFunction()" id="top-btn" title="Go to top">Top</button>
       </div>
     </div>
 
@@ -100,13 +103,7 @@
       }
     </script>
 
-    <script>
-      var loremIpsumRun = false;
-      var speechTranslationConfig = undefined;
-      var recognizer = undefined;
-      var audioFile = undefined;
-      var filePicker = document.getElementById("file-picker");
-
+    <script>      
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       if (urlParams) {
@@ -127,38 +124,27 @@
     </script>
 
     <script>
-      var textBoxCount = 0;
-
       /* 
-          Dynamically appends an "editable-text-box" in the "text-boxes" div in the following format.
+          Appends an "editable-text-box" in the "text-boxes" div in the following format.
 
           <div class="editable-text-box">
-              <div class="editable-text-wrapper">
-                  <div class="editable-text" contentEditable="true" tabindex="0">
-                      text here
-                  </div>
-              </div>
+              <textarea class="editable-textarea" name="editable-text" rows="4" cols="50"></textarea>
               <div class="play-snippet-wrapper">
                   <img class="play-snippet-button" src="images/play-snippet.jpg" alt="play snippet">
               </div>
           </div>
       */
-      function appendEditableTextBox(text, textAreaID, textWrapperID, playButtonID) {
+      function appendEditableTextBox(text, textAreaID, playButtonID) {
           var textBox=document.createElement("div");
           textBox.className = "editable-text-box";
 
-          var textWrapper=document.createElement("div");
-          textWrapper.className = "editable-text-wrapper"; 
-          textWrapper.id = textWrapperID;
-          textBox.appendChild(textWrapper);
-
-          var editableText=document.createElement("div");
-          editableText.className = "editable-text"; 
-          editableText.id = textAreaID;
-          editableText.innerText = text;
-          editableText.contentEditable = "true";
-          editableText.tabIndex = "0";
-          textWrapper.appendChild(editableText);
+          var editableTextArea=document.createElement("textarea");
+          editableTextArea.className = "editable-textarea";
+          editableTextArea.id = textAreaID;
+          editableTextArea.value = text;
+          editableTextArea.rows = "4";
+          editableTextArea.cols = "50";
+          textBox.appendChild(editableTextArea);
 
           var playSnippetWrapper=document.createElement("div");
           playSnippetWrapper.className = "play-snippet-wrapper"; 
@@ -173,51 +159,123 @@
 
           document.getElementsByClassName('text-boxes')[0].appendChild(textBox);
       }
-
-      function addLoremIpsum() {
-        if (textBoxCount > 10)
-          clearInterval(lorumIpsumTimer);
-
-        let textAreaID = "text-area-" + textBoxCount.toString() + "-id";
-        let textWrapperID = "text-wrapper-" + textBoxCount.toString() + "-id";
-        let playButtonID = "play-button-" + textBoxCount.toString() + "-id";
-        let ipsum = new LoremIpsum();
-        let sentence = ipsum.sentence(8, 12);
-
-        appendEditableTextBox(sentence, textAreaID, textWrapperID, playButtonID);
-
-        document.getElementById("real-time-transcript-text").innerText += sentence + "\n";
-        textBoxCount++;
-      }
     </script>
 
     <script>
+        var loremIpsumRun = false;
+        var speechTranslationConfig = undefined;
+        var recognizer = undefined;
+        var audioFile = undefined;
+        var textBoxCount = 0;
         var lorumIpsumTimer;
+        var textBoxDetails = {}; 
+        var audioSnippetEndTime = 0;      
+        var filePicker = document.getElementById("file-picker");
+        var audioPlayer = document.getElementById("audio-player");
+        var realTimeTextArea = document.getElementById("real-time-transcript-textarea");
+        var stopTranslationButton = document.getElementById("stop-translation-button");
+        var startTranslationButton = document.getElementById("start-translation-button");
 
-        function addTranslation(text)
-        {
-          let textAreaID = "text-area-" + textBoxCount.toString() + "-id";
-          let textWrapperID = "text-wrapper-" + textBoxCount.toString() + "-id";
-          let playButtonID = "play-button-" + textBoxCount.toString() + "-id";
+        class EditableTextBoxDetails {
+          constructor(textAreaID, audioOffsetInTicks, audioDurationInTicks) {
+            this.textAreaID = textAreaID;
+            this.audioOffsetInTicks = audioOffsetInTicks;
+            this.audioDurationInTicks = audioDurationInTicks;
 
-          appendEditableTextBox(text, textAreaID, textWrapperID, playButtonID);
-
-          document.getElementById("real-time-transcript-text").innerText += text + "\n";
-          textBoxCount++;          
+            /* A single tick represents one hundred nanoseconds or one ten-millionth of a second.
+               There's 1e9 nanoseconds in a second, and there's 100 nanoseconds per tick, so dividing by
+               1e7 gives the time in seconds. */
+            this.audioOffsetInSecs = audioOffsetInTicks / 10000000;
+            this.audioDurationInSecs = audioDurationInTicks / 10000000;
+          }
         }
 
-        filePicker.addEventListener("change", function () {
-            audioFile = filePicker.files[0];          
+        audioPlayer.addEventListener("timeupdate", function() {
+            if(this.currentTime >= audioSnippetEndTime) {
+                this.pause();
+            }
         });
 
-        document.getElementById("stop-translation-button").addEventListener("click", function () {
+        filePicker.addEventListener("change", function () {
+            audioFile = filePicker.files[0];  
+            audioPlayer.src = URL.createObjectURL(audioFile);   
+            sound.onend = function(e) {
+              URL.revokeObjectURL(this.src);
+            }
+        });
+
+        function playInterval(start, stop) {
+          audioPlayer.currentTime = start;
+          audioSnippetEndTime = stop;
+          audioPlayer.play();
+        }
+
+        function playSnippetClick(event) {
+          details = textBoxDetails[event.target.id];
+          console.log(event.target.id + 
+            `' clicked: playing audio at offset ${details.audioOffsetInSecs}s for ${details.audioDurationInSecs}s`);          
+          playInterval(details.audioOffsetInSecs, details.audioOffsetInSecs + details.audioDurationInSecs);
+        }
+
+        function intToPlayButtonID(n) {
+          return "play-button-" + n.toString() + "-id";
+        }
+
+        function intToTextAreaID(n) {
+          return "text-area-" + n.toString() + "-id";
+        }
+
+        function printAllPhraseDetails() {
+          for (let i = 0; i < textBoxCount; i++) {
+            let playButtonID = intToPlayButtonID(i);
+            details = textBoxDetails[playButtonID];
+            let text = document.getElementById(details.textAreaID).value;
+            console.log(`${i}\n${details.audioOffsetInSecs}s -> ${details.audioOffsetInSecs + details.audioDurationInSecs}s\n${text}\n\n`); 
+          }
+        }
+
+        function addLoremIpsum() {
+          if (textBoxCount > 10)
+            clearInterval(lorumIpsumTimer);
+
+          let textAreaID = intToTextAreaID(textBoxCount);
+          let playButtonID = intToPlayButtonID(textBoxCount);
+          let ipsum = new LoremIpsum();
+          let sentence = ipsum.sentence(8, 12);
+
+          textBoxDetails[playButtonID] = new EditableTextBoxDetails(textAreaID, textBoxCount * 10000000, 10000000);
+          appendEditableTextBox(sentence, textAreaID, playButtonID);
+
+          document.getElementById(playButtonID).addEventListener("click", playSnippetClick);
+          realTimeTextArea.value += sentence + "\n";
+          textBoxCount++;
+        }
+
+        function addTranslation(result) {
+          let textAreaID = intToTextAreaID(textBoxCount);
+          let playButtonID = intToPlayButtonID(textBoxCount);
+
+          let translation = result.translations.get("en");
+          textBoxDetails[playButtonID] = new EditableTextBoxDetails(textAreaID, result.offset, result.duration);
+          appendEditableTextBox(translation, textAreaID, playButtonID);
+
+          document.getElementById(playButtonID).addEventListener("click", playSnippetClick);
+          realTimeTextArea.value += translation + "\n";
+          textBoxCount++;
+        }
+        
+        stopTranslationButton.addEventListener("click", function () {
           if (recognizer)
             recognizer.stopContinuousRecognitionAsync();
+
+          if (loremIpsumRun)
+            clearInterval(lorumIpsumTimer);
         });
 
-        document.getElementById("start-translation-button").addEventListener("click", function () {
+        startTranslationButton.addEventListener("click", function () {
           if (loremIpsumRun) {
-            lorumIpsumTimer = setInterval(addLoremIpsum, 3000);
+            lorumIpsumTimer = setInterval(addLoremIpsum, 2000);
+            addLoremIpsum();
             return;
           }
 
@@ -254,8 +312,7 @@
                 console.log(`TRANSLATED: Text=${e.result.text}`);
 
                 if (e.result.translations) {
-                  let translation = e.result.translations.get("en");
-                  addTranslation(translation);
+                  addTranslation(e.result);
                 }
               }
               else if (e.result.reason == SpeechSDK.ResultReason.NoMatch) {
@@ -280,6 +337,23 @@
         });
     </script>
 
+    <script>
+      topbutton = document.getElementById("top-btn");
 
+      window.onscroll = function () { scrollFunction() };
+
+      function scrollFunction() {
+        if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600 && screen.width < 700) {
+          topbutton.style.display = "block";
+        } else {
+          topbutton.style.display = "none";
+        }
+      }
+
+      function topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      }
+    </script>
 </body>
 </html>
