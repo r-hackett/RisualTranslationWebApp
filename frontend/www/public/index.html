@@ -103,7 +103,21 @@
       }
     </script>
 
-    <script>      
+    <script>
+      var loremIpsumRun = false;
+      var speechTranslationConfig = undefined;
+      var recognizer = undefined;
+      var audioFile = undefined;
+      var textBoxCount = 0;
+      var lorumIpsumTimer;
+      var textBoxDetails = {}; 
+      var audioSnippetEndTime = 0;      
+      var filePicker = document.getElementById("file-picker");
+      var audioPlayer = document.getElementById("audio-player");
+      var realTimeTextArea = document.getElementById("real-time-transcript-textarea");
+      var stopTranslationButton = document.getElementById("stop-translation-button");
+      var startTranslationButton = document.getElementById("start-translation-button");
+
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       if (urlParams) {
@@ -162,20 +176,6 @@
     </script>
 
     <script>
-        var loremIpsumRun = false;
-        var speechTranslationConfig = undefined;
-        var recognizer = undefined;
-        var audioFile = undefined;
-        var textBoxCount = 0;
-        var lorumIpsumTimer;
-        var textBoxDetails = {}; 
-        var audioSnippetEndTime = 0;      
-        var filePicker = document.getElementById("file-picker");
-        var audioPlayer = document.getElementById("audio-player");
-        var realTimeTextArea = document.getElementById("real-time-transcript-textarea");
-        var stopTranslationButton = document.getElementById("stop-translation-button");
-        var startTranslationButton = document.getElementById("start-translation-button");
-
         class EditableTextBoxDetails {
           constructor(textAreaID, audioOffsetInTicks, audioDurationInTicks) {
             this.textAreaID = textAreaID;
