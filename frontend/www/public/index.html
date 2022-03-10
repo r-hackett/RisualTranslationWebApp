@@ -76,7 +76,8 @@
         </div>
 
         <audio class="sidebar-item" id="audio-player" controls preload></audio>
-                
+        <div class="sidebar-item">Progress: <span id="translation-progress">0</span>%</div>
+
       </div>      
       <div class="main">
         <div class="text-boxes">
@@ -111,12 +112,13 @@
       var textBoxCount = 0;
       var lorumIpsumTimer;
       var textBoxDetails = {}; 
-      var audioSnippetEndTime = 0;      
+      var audioSnippetEndTime = 0;
       var filePicker = document.getElementById("file-picker");
       var audioPlayer = document.getElementById("audio-player");
       var realTimeTextArea = document.getElementById("real-time-transcript-textarea");
       var stopTranslationButton = document.getElementById("stop-translation-button");
       var startTranslationButton = document.getElementById("start-translation-button");
+      var translationProgress = document.getElementById("translation-progress");
 
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
@@ -199,7 +201,7 @@
         filePicker.addEventListener("change", function () {
             audioFile = filePicker.files[0];  
             audioPlayer.src = URL.createObjectURL(audioFile);   
-            sound.onend = function(e) {
+            audioPlayer.onend = function(e) {
               URL.revokeObjectURL(this.src);
             }
         });
@@ -257,6 +259,8 @@
 
           let translation = result.translations.get("en");
           textBoxDetails[playButtonID] = new EditableTextBoxDetails(textAreaID, result.offset, result.duration);
+          let progress = (textBoxDetails[playButtonID].audioOffsetInSecs / audioPlayer.duration) * 100;
+          translationProgress.innerText = progress.toFixed(1).toString();
           appendEditableTextBox(translation, textAreaID, playButtonID);
 
           document.getElementById(playButtonID).addEventListener("click", playSnippetClick);
@@ -321,16 +325,17 @@
           };
           recognizer.canceled = (s, e) => {
               console.log(`CANCELED: Reason=${e.reason}`);
-              if (e.reason == CancellationReason.Error) {
+              if (e.reason == SpeechSDK.CancellationReason.Error) {
                   console.log(`"CANCELED: ErrorCode=${e.errorCode}`);
                   console.log(`"CANCELED: ErrorDetails=${e.errorDetails}`);
                   console.log("CANCELED: Did you update the subscription info?");
-              }
+              } 
               recognizer.stopContinuousRecognitionAsync();
           };
           recognizer.sessionStopped = (s, e) => {
-              console.log("\n    Session stopped event.");
-              recognizer.stopContinuousRecognitionAsync();
+            translationProgress.innerText = "100";
+            console.log("\n    Session stopped event.");
+            recognizer.stopContinuousRecognitionAsync();
           };
 
           recognizer.startContinuousRecognitionAsync();  
