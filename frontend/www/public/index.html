@@ -259,7 +259,8 @@
 
           let translation = result.translations.get("en");
           textBoxDetails[playButtonID] = new EditableTextBoxDetails(textAreaID, result.offset, result.duration);
-          let progress = (textBoxDetails[playButtonID].audioOffsetInSecs / audioPlayer.duration) * 100;
+          let d = textBoxDetails[playButtonID];
+          let progress = ((d.audioOffsetInSecs + d.audioDurationInSecs) / audioPlayer.duration) * 100;
           translationProgress.innerText = progress.toFixed(1).toString();
           appendEditableTextBox(translation, textAreaID, playButtonID);
 
