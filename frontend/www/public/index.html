@@ -120,6 +120,11 @@
       var startTranslationButton = document.getElementById("start-translation-button");
       var translationProgress = document.getElementById("translation-progress");
 
+      // Search the URL parameters for "lorem" where it equals true. If found, enable lorem ipsum mode, where
+      // clicking the "start translation" button will ignore the input file and subscription key, and will 
+      // not access the Speech SDK. Instead, it will output a new editable box with lorem ipsum text at set 
+      // time intervals. This is useful for testing the program without without having to pay for access 
+      // to the Speech SDK. 
       const queryString = window.location.search;
       const urlParams = new URLSearchParams(queryString);
       if (urlParams) {
@@ -192,12 +197,22 @@
           }
         }
 
+        // The timeupdate event is called whenever currentTime is updated. This is used to stop audio
+        // when it has passed the end of the a snippet, but this is also called whenever the audio file 
+        // is playing..
         audioPlayer.addEventListener("timeupdate", function() {
             if(this.currentTime >= audioSnippetEndTime) {
-                this.pause();
+              // The user may play the file using the audio player, so audioSnippetEndTime should
+              // not cause the audio to pause early. We set it to the full duration of the file to 
+              // prevent this.
+              audioSnippetEndTime = audioPlayer.duration;
+              this.pause();
             }
         });
 
+        // The change event is triggered when the user selects an input file. Since Javascript
+        // does not know about the user's directory structure (for security reasons), URL.createObjectURL
+        // is used.
         filePicker.addEventListener("change", function () {
             audioFile = filePicker.files[0];  
             audioPlayer.src = URL.createObjectURL(audioFile);   
@@ -236,6 +251,7 @@
           }
         }
 
+        // Add a text box without using up our Azure credits.
         function addLoremIpsum() {
           if (textBoxCount > 10)
             clearInterval(lorumIpsumTimer);
@@ -253,6 +269,7 @@
           textBoxCount++;
         }
 
+        // Add a text box with the result of a translation from the Speech SDK.
         function addTranslation(result) {
           let textAreaID = intToTextAreaID(textBoxCount);
           let playButtonID = intToPlayButtonID(textBoxCount);
@@ -278,6 +295,7 @@
         });
 
         startTranslationButton.addEventListener("click", function () {
+          // If loremIpsumRun is true, execute lorem ipsum run. The Speech SDK is not used.
           if (loremIpsumRun) {
             lorumIpsumTimer = setInterval(addLoremIpsum, 2000);
             addLoremIpsum();
