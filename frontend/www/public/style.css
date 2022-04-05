@@ -12,7 +12,7 @@ body {
     font-family: sans-serif;
     padding: 0px;
     margin: 0px;
-    background-color: #353535;
+    background-color: #F2E9EB;
     min-width: 400px;
     min-height: 500px;
 }
@@ -23,14 +23,13 @@ body {
 }
  
 .sidebar {
-    background-color: #404040;
+    background-color: #5f4c4c;
     color: #fff;
     width: 100%;
     margin-bottom: 3%;
     padding-top: 3%;
     padding-bottom: 5%;
-    border-bottom: 4px solid #202020;
-    box-shadow: 0 5px 10px #101010;
+    box-shadow: 0 2px 5px black;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -58,17 +57,18 @@ body {
 }
  
 #real-time-transcript-textarea {
+    color: #fff;
     height: 30vh;
-    background-color: #c6c6c6;
+    background-color: #4c3c3c;
     margin: 1%;
     margin-bottom: 2%;
     padding: 1vh;
     border-radius: 10px;
-    filter: drop-shadow(6px 6px 3px #101010);
+    border-color: #4c3c3c;
+    filter: drop-shadow(2px 2px 5px black);
     -ms-overflow-style: none;
     scrollbar-width: none;
-
-    width: calc(98% - 2vh);
+    width: 94%;
     overflow: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;   
@@ -78,19 +78,19 @@ body {
 .editable-text-box {
     display: flex;
     flex-direction: row;
-
     width: calc(98% - 2vh);
     height: 100%;
-
     margin: 1%;
     margin-bottom: 1%;
     padding: 1vh;
 }
  
 .editable-textarea {
+    color: #fff;
     border-radius: 10px;
-    filter: drop-shadow(6px 6px 3px #101010);
-    background-color: #c6c6c6;
+    border-color: #4c3c3c;
+    filter: drop-shadow(2px 2px 4px black);
+    background-color: #4c3c3c;
     padding: 1vh;
     width: 98%;
     height: 100%;
@@ -99,7 +99,7 @@ body {
 }
  
 .play-snippet-wrapper {
-    filter: drop-shadow(6px 6px 3px #101010);
+    filter: drop-shadow(2px 2px 4px black);
     max-height: 8vh;
     max-width: 8vh;
     justify-content: flex-end;
@@ -115,7 +115,7 @@ body {
     cursor: pointer;
 }
  
-#language-options, #region-options {
+#language-options,#output-language-options, #region-options {
     width: 100%;
 }
  
@@ -131,7 +131,7 @@ body {
     z-index: 99;
     border: none;
     outline: none;
-    background-color: #202020;
+    background-color: #4c3c3c;
     color: white;
     padding: 20px;
     border-radius: 10px;
@@ -139,10 +139,9 @@ body {
 }
  
 #top-btn:hover {
-    background-color: #505050;
+    color: #2f2626;
 }
- 
- 
+
 @media screen and (min-width: 700px) {
     .wrapper {
         flex-direction: row;
@@ -154,9 +153,7 @@ body {
         padding: 0;
         margin: 0;
         top: 0;
-        border-bottom: none;
-        border-right: 4px solid #202020;
-        box-shadow: 5px 0 10px #202020;
+        box-shadow: 2px 0 5px black;
     }
     .sidebar-item {
         margin: 5% 5% 1%;
