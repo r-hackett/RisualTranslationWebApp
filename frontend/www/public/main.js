@@ -9,7 +9,7 @@ function Initialize(onComplete) {
 
 
 
-var loremIpsumRun = true;
+var loremIpsumRun = false;
 var speechTranslationConfig = undefined;
 var recognizer = undefined;
 var audioFile = undefined;
