@@ -9,7 +9,7 @@ function Initialize(onComplete) {
 
 
 
-var loremIpsumRun = false;
+var loremIpsumRun = true;
 var speechTranslationConfig = undefined;
 var recognizer = undefined;
 var audioFile = undefined;
@@ -200,7 +200,7 @@ saveChangesButton.addEventListener("click", function () {
         details = textBoxDetails[playButtonID];
         realTimeTextBox.innerHTML += document.getElementById(
             details.textAreaID
-        ).value;
+        ).value.replaceAll("\n","<br>");
         realTimeTextBox.innerHTML += "<br>";
     }
 });
