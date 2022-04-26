@@ -7,8 +7,6 @@ function Initialize(onComplete) {
     }
 }
 
-
-
 var loremIpsumRun = false;
 var speechTranslationConfig = undefined;
 var recognizer = undefined;
@@ -43,6 +41,9 @@ if (urlParams) {
 
 document.addEventListener("DOMContentLoaded", function () {
     var SpeechSDK;
+
+    saveChangesButton.disabled = true;
+    saveTranscriptButton.disabled = true;
 
     Initialize(function (speechSdk) {
         SpeechSDK = speechSdk;
@@ -233,6 +234,7 @@ stopTranslationButton.addEventListener("click", function () {
 });
 
 startTranslationButton.addEventListener("click", function () {
+
     // If loremIpsumRun is true, execute lorem ipsum run. The Speech SDK is not used.
     if (loremIpsumRun) {
         lorumIpsumTimer = setInterval(addLoremIpsum, 2000);
@@ -265,6 +267,8 @@ startTranslationButton.addEventListener("click", function () {
 
     recognizer = new SpeechSDK.TranslationRecognizer(speechTranslationConfig, audioConfig);
 
+    startTranslationButton.disabled = true;
+
     recognizer.recognizing = (s, e) => {
         console.log(`TRANSLATING: Text=${e.result.text}`);
     };
@@ -291,6 +295,9 @@ startTranslationButton.addEventListener("click", function () {
     };
     recognizer.sessionStopped = (s, e) => {
         translationProgress.innerText = "100";
+        saveChangesButton.disabled = false;
+        saveTranscriptButton.disabled = false;
+        startTranslationButton.disabled = false;     
         console.log("\n    Session stopped event.");
         recognizer.stopContinuousRecognitionAsync();
     };
