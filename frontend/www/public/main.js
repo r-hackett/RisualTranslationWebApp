@@ -23,6 +23,8 @@ var realTimeTextBox = document.getElementById("real-time-transcript-box");
 var stopTranslationButton = document.getElementById("stop-translation-button");
 var startTranslationButton = document.getElementById("start-translation-button");
 var translationProgress = document.getElementById("translation-progress");
+var saveChangesButton = document.getElementById("save-changes-button");
+var saveTranscriptButton = document.getElementById("save-transcript-button");
 
 // Search the URL parameters for "lorem" where it equals true. If found, enable lorem ipsum mode, where
 // clicking the "start translation" button will ignore the input file and subscription key, and will 
@@ -189,6 +191,38 @@ function addTranslation(result) {
     realTimeTextBox.innerHTML += translation + "<br>";
     textBoxCount++;
 }
+
+saveChangesButton.addEventListener("click", function () {
+    realTimeTextBox.innerHTML = "";
+
+    for (let i = 0; i < textBoxCount; i++) {
+        let playButtonID = intToPlayButtonID(i);
+        details = textBoxDetails[playButtonID];
+        realTimeTextBox.innerHTML += document.getElementById(
+            details.textAreaID
+        ).value;
+        realTimeTextBox.innerHTML += "<br>";
+    }
+});
+
+saveTranscriptButton.addEventListener("click", function () {
+    const textToBLOB = new Blob([realTimeTextBox.innerHTML.replaceAll("<br>", "\n")], {
+        type: "text/plain",
+    });
+    const sFileName = "transcript.txt";
+
+    let newLink = document.createElement("a");
+    newLink.download = sFileName;
+
+    if (window.webkitURL != null) {
+        newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+    } else {
+        newLink.href = window.URL.createObjectURL(textToBLOB);
+        newLink.style.display = "none";
+        document.body.appendChild(newLink);
+    }
+    newLink.click();
+});
 
 stopTranslationButton.addEventListener("click", function () {
     if (recognizer)
