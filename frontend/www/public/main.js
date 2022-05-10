@@ -18,7 +18,6 @@ var filePicker = document.getElementById("file-picker");
 var audioPlayer = document.getElementById("audio-player");
 var audioSnippetEndTime = audioPlayer.duration;
 var realTimeTextBox = document.getElementById("real-time-transcript-box");
-var stopTranslationButton = document.getElementById("stop-translation-button");
 var startTranslationButton = document.getElementById("start-translation-button");
 var translationProgress = document.getElementById("translation-progress");
 var saveChangesButton = document.getElementById("save-changes-button");
@@ -225,14 +224,6 @@ saveTranscriptButton.addEventListener("click", function () {
     newLink.click();
 });
 
-stopTranslationButton.addEventListener("click", function () {
-    if (recognizer)
-        recognizer.stopContinuousRecognitionAsync();
-
-    if (loremIpsumRun)
-        clearInterval(lorumIpsumTimer);
-});
-
 startTranslationButton.addEventListener("click", function () {
 
     // If loremIpsumRun is true, execute lorem ipsum run. The Speech SDK is not used.
@@ -297,7 +288,6 @@ startTranslationButton.addEventListener("click", function () {
         translationProgress.innerText = "100";
         saveChangesButton.disabled = false;
         saveTranscriptButton.disabled = false;
-        startTranslationButton.disabled = false;     
         console.log("\n    Session stopped event.");
         recognizer.stopContinuousRecognitionAsync();
     };
