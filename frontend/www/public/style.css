@@ -136,7 +136,8 @@ body {
 #save-changes-button,
 #save-transcript-button,
 #start-translation-button,
-#stop-translation-button {
+#stop-translation-button,
+#logOut {
     min-height: 21px;
     height: 4%;
 }
