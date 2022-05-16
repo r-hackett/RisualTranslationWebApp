@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Translator Web App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="sidebar">
+      <input class="sidebar-item" type="file" id="file-picker" accept=".wav" name="file-picker">
+      <div class="sidebar-item">
+        <div class="label-text">Source language</div>
+        <!-- For the full list of supported languages see:
+          https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
+        <select id="language-options">
+          <option value="af-ZA">Afrikaans (South Africa)</option>
+          <option value="am-ET">Amharic (Ethiopia)</option>
+          <option value="ar-DZ">Arabic (Algeria)</option>
+          <option value="ar-BH">Arabic (Bahrain), modern standard</option>
+          <option value="ar-EG">Arabic (Egypt)</option>
+          <option value="ar-IQ">Arabic (Iraq)</option>
+          <option value="ar-IL">Arabic (Israel)</option>
+          <option value="ar-JO">Arabic (Jordan)</option>
+          <option value="ar-KW">Arabic (Kuwait)</option>
+          <option value="ar-LB">Arabic (Lebanon)</option>
+          <option value="ar-LY">Arabic (Libya)</option>
+          <option value="ar-MA">Arabic (Morocco)</option>
+          <option value="ar-OM">Arabic (Oman)</option>
+          <option value="ar-PS">Arabic (Palestinian Authority)</option>
+          <option value="ar-QA">Arabic (Qatar)</option>
+          <option value="ar-SA">Arabic (Saudi Arabia)</option>
+          <option value="ar-SY">Arabic (Syria)</option>
+          <option value="ar-TN">Arabic (Tunisia)</option>
+          <option value="ar-AE">Arabic (United Arab Emirates)</option>
+          <option value="ar-YE">Arabic (Yemen)</option>
+          <option value="bg-BG">Bulgarian (Bulgaria)</option>
+          <option value="my-MM">Burmese (Myanmar)</option>
+          <option value="ca-ES">Catalan (Spain)</option>
+          <option value="zh-HK">Chinese (Cantonese, Traditional)</option>
+          <option value="zh-CN">Chinese (Mandarin, Simplified)</option>
+          <option value="zh-TW">Chinese (Taiwanese Mandarin)</option>
+          <option value="hr-HR">Croatian (Croatia)</option>
+          <option value="cs-CZ">Czech (Czech)</option>
+          <option value="da-DK">Danish (Denmark)</option>
+          <option value="nl-BE">Dutch (Belgium)</option>
+          <option value="nl-NL">Dutch (Netherlands)</option>
+          <option value="en-AU">English (Australia)</option>
+          <option value="en-CA">English (Canada)</option>
+          <option value="en-GH">English (Ghana)</option>
+          <option value="en-HK">English (Hong Kong)</option>
+          <option value="en-IN">English (India)</option>
+          <option value="en-IE">English (Ireland)</option>
+          <option value="en-KE">English (Kenya)</option>
+          <option value="en-NZ">English (New Zealand)</option>
+          <option value="en-NG">English (Nigeria)</option>
+          <option value="en-PH">English (Philippines)</option>
+          <option value="en-SG">English (Singapore)</option>
+          <option value="en-ZA">English (South Africa)</option>
+          <option value="en-TZ">English (Tanzania)</option>
+          <option value="en-GB">English (United Kingdom)</option>
+          <option value="en-US">English (United States)</option>
+          <option value="et-EE">Estonian (Estonia)</option>
+          <option value="fil-PH">Filipino (Philippines)</option>
+          <option value="fi-FI">Finnish (Finland)</option>
+          <option value="fr-BE">French (Belgium)</option>
+          <option value="fr-CA">French (Canada)</option>
+          <option value="fr-FR">French (France)</option>
+          <option value="fr-CH">French (Switzerland)</option>
+          <option value="de-AT">German (Austria)</option>
+          <option value="de-DE" selected>German (Germany)</option>
+          <option value="de-CH">German (Switzerland)</option>
+          <option value="el-GR">Greek (Greece)</option>
+          <option value="gu-IN">Gujarati (Indian)</option>
+          <option value="he-IL">Hebrew (Israel)</option>
+          <option value="hi-IN">Hindi (India)</option>
+          <option value="hu-HU">Hungarian (Hungary)</option>
+          <option value="is-IS">Icelandic (Iceland)</option>
+          <option value="id-ID">Indonesian (Indonesia)</option>
+          <option value="ga-IE">Irish (Ireland)</option>
+          <option value="it-IT">Italian (Italy)</option>
+          <option value="ja-JP">Japanese (Japan)</option>
+          <option value="jv-ID">Javanese (Indonesia)</option>
+          <option value="kn-IN">Kannada (India)</option>
+          <option value="km-KH">Khmer (Cambodia)</option>
+          <option value="ko-KR">Korean (Korea)</option>
+          <option value="lo-LA">Lao (Laos)</option>
+          <option value="lv-LV">Latvian (Latvia)</option>
+          <option value="lt-LT">Lithuanian (Lithuania)</option>
+          <option value="mk-MK">Macedonian (North Macedonia)</option>
+          <option value="ms-MY">Malay (Malaysia)</option>
+          <option value="mt-MT">Maltese (Malta)</option>
+          <option value="mr-IN">Marathi (India)</option>
+          <option value="nb-NO">Norwegian (Bokmål, Norway)</option>
+          <option value="fa-IR">Persian (Iran)</option>
+          <option value="pl-PL">Polish (Poland)</option>
+          <option value="pt-BR">Portuguese (Brazil)</option>
+          <option value="pt-PT">Portuguese (Portugal)</option>
+          <option value="ro-RO">Romanian (Romania)</option>
+          <option value="ru-RU">Russian (Russia)</option>
+          <option value="sr-RS">Serbian (Serbia)</option>
+          <option value="si-LK">Sinhala (Sri Lanka)</option>
+          <option value="sk-SK">Slovak (Slovakia)</option>
+          <option value="sl-SI">Slovenian (Slovenia)</option>
+          <option value="es-AR">Spanish (Argentina)</option>
+          <option value="es-BO">Spanish (Bolivia)</option>
+          <option value="es-CL">Spanish (Chile)</option>
+          <option value="es-CO">Spanish (Colombia)</option>
+          <option value="es-CR">Spanish (Costa Rica)</option>
+          <option value="es-CU">Spanish (Cuba)</option>
+          <option value="es-DO">Spanish (Dominican Republic)</option>
+          <option value="es-EC">Spanish (Ecuador)</option>
+          <option value="es-SV">Spanish (El Salvador)</option>
+          <option value="es-GQ">Spanish (Equatorial Guinea)</option>
+          <option value="es-GT">Spanish (Guatemala)</option>
+          <option value="es-HN">Spanish (Honduras)</option>
+          <option value="es-MX">Spanish (Mexico)</option>
+          <option value="es-NI">Spanish (Nicaragua)</option>
+          <option value="es-PA">Spanish (Panama)</option>
+          <option value="es-PY">Spanish (Paraguay)</option>
+          <option value="es-PE">Spanish (Peru)</option>
+          <option value="es-PR">Spanish (Puerto Rico)</option>
+          <option value="es-ES">Spanish (Spain)</option>
+          <option value="es-UY">Spanish (Uruguay)</option>
+          <option value="es-US">Spanish (USA)</option>
+          <option value="es-VE">Spanish (Venezuela)</option>
+          <option value="sw-KE">Swahili (Kenya)</option>
+          <option value="sw-TZ">Swahili (Tanzania)</option>
+          <option value="sv-SE">Swedish (Sweden)</option>
+          <option value="ta-IN">Tamil (India)</option>
+          <option value="te-IN">Telugu (India)</option>
+          <option value="th-TH">Thai (Thailand)</option>
+          <option value="tr-TR">Turkish (Turkey)</option>
+          <option value="uk-UA">Ukrainian (Ukraine)</option>
+          <option value="uz-UZ">Uzbek (Uzbekistan)</option>
+          <option value="vi-VN">Vietnamese (Vietnam)</option>
+          <option value="zu-ZA">Zulu (South Africa)</option>
+        </select>
+      </div>
+      <div class="sidebar-item">
+        <div class="label-text">Output language</div>
+        <!-- For the full list of supported languages see:
+          https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
+        <select id="output-language-options">
+          <option value="af">Afrikaans</option>
+          <option value="sq">Albanian</option>
+          <option value="am">Amharic</option>
+          <option value="ar">Arabic</option>
+          <option value="hy">Armenian</option>
+          <option value="as">Assamese</option>
+          <option value="az">Azerbaijani</option>
+          <option value="bn">Bangla</option>
+          <option value="ba">Bashkir</option>
+          <option value="bs">Bosnian (Latin)</option>
+          <option value="bg">Bulgarian</option>
+          <option value="yue">Cantonese (Traditional)</option>
+          <option value="ca">Catalan</option>
+          <option value="lzh">Chinese (Literary)</option>
+          <option value="zh-Hans">Chinese Simplified</option>
+          <option value="zh-Hant">Chinese Traditional</option>
+          <option value="hr">Croatian</option>
+          <option value="cs">Czech</option>
+          <option value="da">Danish</option>
+          <option value="prs">Dari</option>
+          <option value="dv">Divehi</option>
+          <option value="nl">Dutch</option>
+          <option value="en" selected>English</option>
+          <option value="et">Estonian</option>
+          <option value="fj">Fijian</option>
+          <option value="fil">Filipino</option>
+          <option value="fi">Finnish</option>
+          <option value="fr">French</option>
+          <option value="fr-ca">French (Canada)</option>
+          <option value="ka">Georgian</option>
+          <option value="de">German</option>
+          <option value="el">Greek</option>
+          <option value="gu">Gujarati</option>
+          <option value="ht">Haitian Creole</option>
+          <option value="he">Hebrew</option>
+          <option value="hi">Hindi</option>
+          <option value="mww">Hmong Daw</option>
+          <option value="hu">Hungarian</option>
+          <option value="is">Icelandic</option>
+          <option value="id">Indonesian</option>
+          <option value="ikt">Inuinnaqtun</option>
+          <option value="iu">Inuktitut</option>
+          <option value="iu-Latn">Inuktitut (Latin)</option>
+          <option value="ga">Irish</option>
+          <option value="it">Italian</option>
+          <option value="ja">Japanese</option>
+          <option value="kn">Kannada</option>
+          <option value="kk">Kazakh</option>
+          <option value="km">Khmer</option>
+          <option value="tlh-Latn">Klingon</option>
+          <option value="tlh-Piqd">Klingon (plqaD)</option>
+          <option value="ko">Korean</option>
+          <option value="ku">Kurdish (Central)</option>
+          <option value="kmr">Kurdish (Northern)</option>
+          <option value="ky">Kyrgyz</option>
+          <option value="lo">Lao</option>
+          <option value="lv">Latvian</option>
+          <option value="lt">Lithuanian</option>
+          <option value="mk">Macedonian</option>
+          <option value="mg">Malagasy</option>
+          <option value="ms">Malay</option>
+          <option value="ml">Malayalam</option>
+          <option value="mt">Maltese</option>
+          <option value="mi">Maori</option>
+          <option value="mr">Marathi</option>
+          <option value="mn-Cyrl">Mongolian (Cyrillic)</option>
+          <option value="mn-Mong">Mongolian (Traditional)</option>
+          <option value="my">Myanmar</option>
+          <option value="ne">Nepali</option>
+          <option value="nb">Norwegian</option>
+          <option value="or">Odia</option>
+          <option value="ps">Pashto</option>
+          <option value="fa">Persian</option>
+          <option value="pl">Polish</option>
+          <option value="pt">Portuguese (Brazil)</option>
+          <option value="pt-pt">Portuguese (Portugal)</option>
+          <option value="pa">Punjabi</option>
+          <option value="otq">Queretaro Otomi</option>
+          <option value="ro">Romanian</option>
+          <option value="ru">Russian</option>
+          <option value="sm">Samoan</option>
+          <option value="sr-Cyrl">Serbian (Cyrillic)</option>
+          <option value="sr-Latn">Serbian (Latin)</option>
+          <option value="sk">Slovak</option>
+          <option value="sl">Slovenian</option>
+          <option value="so">Somali</option>
+          <option value="es">Spanish</option>
+          <option value="sw">Swahili</option>
+          <option value="sv">Swedish</option>
+          <option value="ty">Tahitian</option>
+          <option value="ta">Tamil</option>
+          <option value="tt">Tatar</option>
+          <option value="te">Telugu</option>
+          <option value="th">Thai</option>
+          <option value="bo">Tibetan</option>
+          <option value="ti">Tigrinya</option>
+          <option value="to">Tongan</option>
+          <option value="tr">Turkish</option>
+          <option value="tk">Turkmen</option>
+          <option value="uk">Ukrainian</option>
+          <option value="hsb">Upper Sorbian</option>
+          <option value="ur">Urdu</option>
+          <option value="ug">Uyghur</option>
+          <option value="uz">Uzbek (Latin)</option>
+          <option value="vi">Vietnamese</option>
+          <option value="cy">Welsh</option>
+          <option value="yua">Yucatec Maya</option>
+          <option value="zu">Zulu</option>
+        </select>
+      </div>
+
+      <button type="button" class="sidebar-item" id="save-changes-button">Save Changes</button>
+      <button type="button" class="sidebar-item" id="save-transcript-button">Save Transcript</button>
+      <button type="button" class="sidebar-item" id="start-translation-button">Start Translation</button>
+
+      <div class="sidebar-item">
+        <div class="label-text">Subscription key</div>
+        <input type="password" id="subscription-key-text" name="subscription-key-text">
+      </div>
+
+      <div class="sidebar-item">
+        <div class="label-text">Region</div>
+        <select id="region-options">
+          <option value="westus">West US</option>
+          <option value="westus2">West US 2</option>
+          <option value="eastus">East US</option>
+          <option value="eastus2">East US 2</option>
+          <option value="eastasia">East Asia</option>
+          <option value="southeastasia">South East Asia</option>
+          <option value="northeurope">North Europe</option>
+          <option value="westeurope" selected="selected">West Europe</option>
+          <option value="usgovarizona">US Gov Arizona</option>
+          <option value="usgovvirginia">US Gov Virginia</option>
+        </select>
+      </div>
+
+      <audio class="sidebar-item" id="audio-player" controls preload></audio>
+      <div class="sidebar-item">Progress: <span id="translation-progress">0</span>%</div>
+
+      <button type="button" class="sidebar-item" id="logOut">Log Out</button>
+    </div>
+    <div class="main">
+      <div class="text-boxes">
+        <p id="real-time-transcript-box"></p>
+      </div>
+      <button onclick="topFunction()" id="top-btn" title="Go to top">Top</button>
+    </div>
+  </div>
+
+  <!-- The core Firebase JS SDK -->
+  <script src="/__/firebase/6.2.4/firebase-app.js"></script>
+  <script src="/__/firebase/6.2.4/firebase-auth.js"></script>
+
+  <!-- Speech SDK REFERENCE -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <!-- Library for generating Lorem Ipsum text
+    https://github.com/fffilo/lorem-ipsum-js -->
+  <script src="lorem-ipsum.js"></script>
+
+  <!-- The rest of JavaScript -->
+  <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,3 +1,35 @@
+const logOut = document.getElementById('logOut');
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCaBo-Vvhn43LscGAaoxDt-rD0ZNLK0g0s",
+    authDomain: "translate-app-5.firebaseapp.com",
+    projectId: "translate-app-5",
+    storageBucket: "translate-app-5.appspot.com",
+    messagingSenderId: "21403966236",
+    appId: "1:21403966236:web:b4b90da189ce016054f8d9"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+        window.location.assign('../'); //If User is not logged in, redirect to login page
+    }
+});
+
+logOut.addEventListener('click', () => {
+    //signOut() is a built in firebase function responsible for signing a user out
+    auth.signOut()
+        .then(() => {
+            window.location.assign('../');
+        })
+        .catch(error => {
+            console.error(error);
+        })
+})
+
 // Speech SDK presence check
 
 // On document load resolve the Speech SDK dependency
@@ -200,7 +232,7 @@ saveChangesButton.addEventListener("click", function () {
         details = textBoxDetails[playButtonID];
         realTimeTextBox.innerHTML += document.getElementById(
             details.textAreaID
-        ).value.replaceAll("\n","<br>");
+        ).value.replaceAll("\n", "<br>");
         realTimeTextBox.innerHTML += "<br>";
     }
 });
